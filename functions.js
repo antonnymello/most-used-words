@@ -1,7 +1,19 @@
 const fs = require('fs');
 const path = require('path');
 
-const subtitles = (value) => value.includes('.srt'); //* Use with filter on readFolder promise
+// const subtitles = (value) => value.includes('.srt'); //* Use with filter on readFolder promise
+
+composition =
+  (...fns) =>
+  (valor) => {
+    return fns.reduce(async (acc, fn) => {
+      if (Promise.resolve(acc) === acc) {
+        return fn(await acc);
+      } else {
+        return fn(acc);
+      }
+    }, valor);
+  };
 
 readFolder = (filesPath) => {
   return new Promise((resolve, reject) => {
@@ -70,18 +82,27 @@ countWords = (words) => {
   );
 };
 
-sortByTimes = (attribute, order = 'up') => (array) => {
-  const upward = (o1, o2) => o1[attribute] - o2[attribute];
-  const decreasing = (o1, o2) => o2[attribute] - o1[attribute];
-  return array.sort(order == 'up' ? upward : decreasing);
-};
+sortByTimes =
+  (attribute, order = 'up') =>
+  (array) => {
+    const upward = (o1, o2) => o1[attribute] - o2[attribute];
+    const decreasing = (o1, o2) => o2[attribute] - o1[attribute];
+    return array.sort(order == 'up' ? upward : decreasing);
+  };
 
 writeResult = (array) => {
   const filePath = path.resolve(__dirname, 'most-used-words.json');
-  return fs.writeFileSync(filePath, JSON.stringify(array, null, '\t'));
+  return fs.writeFileSync(filePath, JSON.stringify(array, null, '\t'), {
+    encoding: 'utf8',
+  });
+};
+
+logger = (json) => {
+  console.log(json);
 };
 
 module.exports = {
+  composition,
   readFolder,
   extensionEndsWith,
   readFile,
@@ -95,4 +116,5 @@ module.exports = {
   countWords,
   sortByTimes,
   writeResult,
+  logger,
 };
